@@ -10,12 +10,18 @@
 
   <div class="hs-form-html" data-region="eu1" data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405" data-portal-id="146384037"></div>
 
+  <!-- HubSpot Form Embed Code (Developer Version) -->
   <script src="https://js-eu1.hsforms.net/forms/embed/developer/146384037.js" defer></script>
 
   <script>
+    // Function to initialize the form listeners
     function initializeHubSpotFormListeners( ) {
+      // Check if hbspt.forms is available
       if (window.hbspt && window.hbspt.forms) {
+        console.log("HubSpot forms library is ready."); // Log when the library is detected
+
         window.hbspt.forms.onFormReady = function(form) {
+          // Check if this is the form we're interested in
           if (form.portalId === "146384037" && form.formId === "151d4e63-52fe-4518-8b7b-1b137af96405") {
             console.log("HubSpot form ready:", form); // Log the form object
 
@@ -63,11 +69,17 @@
           }
         };
       } else {
-        setTimeout(initializeHubSpotFormListeners, 50);
+        // If hbspt.forms is not yet available, retry after a short delay
+        console.log("HubSpot forms library not yet ready, retrying...");
+        setTimeout(initializeHubSpotFormListeners, 50); // Retry every 50ms
       }
     }
 
-    initializeHubSpotFormListeners();
+    // Ensure the DOM is fully loaded before attempting to initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOMContentLoaded fired.");
+      initializeHubSpotFormListeners();
+    });
   </script>
 </body>
 </html>
