@@ -1,29 +1,56 @@
-<!-- thank-you.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Thank You</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thank You!</title>
 </head>
 <body>
   <h1>Thank You!</h1>
-  <p id="message"></p>
+  <p>Thank you for your submission.</p>
+  <p id="emailDisplay"></p>
 
   <script>
-    // Function to get email from query string
-    function getQueryParam(param) {
+    document.addEventListener('DOMContentLoaded', function() {
       const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
+      const submissionGuid = urlParams.get('submissionGuid');
 
-    const email = getQueryParam('email');
-    const messageEl = document.getElementById('message');
+      if (submissionGuid) {
+        console.log("Submission GUID found:", submissionGuid);
 
-    if (email) {
-      messageEl.textContent = `We’ve received your email: ${decodeURIComponent(email)}`;
-    } else {
-      messageEl.textContent = 'Thank you for your submission!';
-    }
+        // IMPORTANT: Replace 'YOUR_HUBSPOT_API_KEY' with your actual HubSpot API key.
+        // WARNING: Exposing API keys in client-side code is a security risk.
+        // For production, consider using a server-side proxy to make this API call.
+        const HUBSPOT_API_KEY = 'pat-eu1-f6c4cca3-d389-46b7-a855-0607e3ad66b9'; // <--- REPLACE THIS!
+        const portalId = '146384037'; // Your portal ID
+
+        const apiUrl = `https://api.hubapi.com/forms/v2/submissions/forms/${portalId}/${submissionGuid}?hapikey=${HUBSPOT_API_KEY}`;
+
+        fetch(apiUrl )
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log("HubSpot Submission Data:", data);
+            const emailField = data.values.find(field => field.name === 'email'); // Assuming 'email' is the field name
+            if (emailField) {
+              document.getElementById('emailDisplay').textContent = `We've received your email: ${emailField.value}`;
+            } else {
+              document.getElementById('emailDisplay').textContent = `We've received your submission.`;
+            }
+          })
+          .catch(error => {
+            console.error("Error fetching submission details:", error);
+            document.getElementById('emailDisplay').textContent = `We've received your submission, but couldn't retrieve details.`;
+          });
+      } else {
+        console.log("No submission GUID found in URL.");
+        document.getElementById('emailDisplay').textContent = `Thank you for your submission.`;
+      }
+    });
   </script>
 </body>
 </html>
