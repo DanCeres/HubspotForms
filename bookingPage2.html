@@ -2,36 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HubSpot Form with Email Redirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HubSpot Form Redirect</title>
 </head>
 <body>
   <h1>Subscribe</h1>
 
-  <!-- ✅ HubSpot Form Embed -->
+  <!-- ✅ HubSpot Embed -->
   <script src="https://js-eu1.hsforms.net/forms/embed/146384037.js" defer></script>
   <div class="hs-form-frame"
        data-region="eu1"
        data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405"
        data-portal-id="146384037"></div>
 
-  <!-- ✅ Intercept the submission and redirect with email -->
+  <!-- ✅ Redirect Logic AFTER DOM fully loaded -->
   <script>
-    window.addEventListener('message', function (event) {
-      const data = event.data;
+    window.addEventListener("load", function () {
+      window.addEventListener("message", function (event) {
+        const data = event.data;
 
-      // Intercept HubSpot form submission before it redirects
-      if (data && data.type === 'hsFormCallback' && data.eventName === 'onFormSubmit') {
-        const fields = data.data || [];
-        const emailField = fields.find(field => field.name === 'email');
-        const email = emailField ? encodeURIComponent(emailField.value) : '';
+        if (data && data.type === "hsFormCallback" && data.eventName === "onFormSubmit") {
+          const fields = data.data || [];
+          const emailField = fields.find(field => field.name === "email");
+          const email = emailField ? encodeURIComponent(emailField.value) : "";
 
-        if (email) {
-          // Cancel default redirect (by having no redirect URL in the HubSpot form)
-          // and perform a manual redirect here
-          window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+          if (email) {
+            // ✅ Perform redirect
+            window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+          }
         }
-      }
+      });
     });
   </script>
 </body>
