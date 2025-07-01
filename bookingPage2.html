@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HubSpot Form</title>
+  <title>HubSpot Form with Email Redirect</title>
 </head>
 <body>
   <h1>Subscribe</h1>
@@ -15,18 +15,20 @@
        data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405"
        data-portal-id="146384037"></div>
 
-  <!-- ✅ Handle submission + redirect with email -->
+  <!-- ✅ Intercept the submission and redirect with email -->
   <script>
     window.addEventListener('message', function (event) {
       const data = event.data;
 
+      // Intercept HubSpot form submission before it redirects
       if (data && data.type === 'hsFormCallback' && data.eventName === 'onFormSubmit') {
         const fields = data.data || [];
         const emailField = fields.find(field => field.name === 'email');
         const email = emailField ? encodeURIComponent(emailField.value) : '';
 
         if (email) {
-          // 🔁 Replace with your actual GitHub Pages URL if needed
+          // Cancel default redirect (by having no redirect URL in the HubSpot form)
+          // and perform a manual redirect here
           window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
         }
       }
