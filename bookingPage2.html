@@ -8,38 +8,42 @@
 <body>
   <h1>Subscribe</h1>
 
-  <!-- HubSpot Form Embed Code -->
-  <!-- This script loads the HubSpot Forms library -->
-  <script src="https://js-eu1.hsforms.net/forms/embed/146384037.js" defer></script>
-
   <!-- This div is where the HubSpot form will be rendered -->
   <div class="hs-form-frame" data-region="eu1" data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405" data-portal-id="146384037"></div>
 
+  <!-- HubSpot Form Embed Code -->
+  <!-- This script loads the HubSpot Forms library -->
+  <!-- It's crucial this script loads BEFORE your custom script that uses hbspt.forms -->
+  <script src="https://js-eu1.hsforms.net/forms/embed/146384037.js" defer></script>
+
   <script>
-    // This function will be called by HubSpot when the form is ready
-    // It's crucial to define this function globally or ensure it's accessible
-    window.hbspt.forms.onFormReady = function(form ) {
-      // Check if this is the form we're interested in
-      if (form.portalId === "146384037" && form.formId === "151d4e63-52fe-4518-8b7b-1b137af96405") {
-        // Attach the onFormSubmitted event listener
-        form.onFormSubmitted(function(event) {
-          // The 'event' object here contains the form submission data
-          // You can access the email from the event.data.email or by querying the form itself
+    // Function to initialize the form listeners
+    function initializeHubSpotFormListeners( ) {
+      // Check if hbspt.forms is available
+      if (window.hbspt && window.hbspt.forms) {
+        window.hbspt.forms.onFormReady = function(form) {
+          // Check if this is the form we're interested in
+          if (form.portalId === "146384037" && form.formId === "151d4e63-52fe-4518-8b7b-1b137af96405") {
+            form.onFormSubmitted(function(event) {
+              const emailInput = form.querySelector("input[name='email']");
+              const email = emailInput ? encodeURIComponent(emailInput.value) : "";
 
-          // ✅ Extract email from the form
-          // It's safer to get the email directly from the form element itself
-          const emailInput = form.querySelector("input[name='email']");
-          const email = emailInput ? encodeURIComponent(emailInput.value) : "";
-
-          if (email) {
-            // Add a small delay to ensure HubSpot's internal processes complete
-            setTimeout(function() {
-              window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
-            }, 100 ); // 100ms delay
+              if (email) {
+                setTimeout(function() {
+                  window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+                }, 100 );
+              }
+            });
           }
-        });
+        };
+      } else {
+        // If hbspt.forms is not yet available, retry after a short delay
+        setTimeout(initializeHubSpotFormListeners, 50); // Retry every 50ms
       }
-    };
+    }
+
+    // Start the initialization process
+    initializeHubSpotFormListeners();
   </script>
 </body>
 </html>
