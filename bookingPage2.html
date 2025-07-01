@@ -12,11 +12,87 @@
   <div class="hs-form-html" data-region="eu1" data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405" data-portal-id="146384037"></div>
 
   <!-- HubSpot Form Embed Code (Developer Version) -->
-  <!-- This script will now handle the redirect based on your HubSpot form settings -->
   <script src="https://js-eu1.hsforms.net/forms/embed/developer/146384037.js" defer></script>
 
-  <!-- No custom JavaScript is needed here for the redirect -->
-  <!-- Remove all previous <script> blocks that attempted to handle the redirect -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function( ) {
+      console.log("DOMContentLoaded fired.");
 
+      // Wait for the HubSpot form to be rendered in the DOM
+      // We'll use a MutationObserver to detect when the form is added
+      const targetNode = document.querySelector('.hs-form-html');
+      if (!targetNode) {
+        console.error("Target div for HubSpot form not found.");
+        return;
+      }
+
+      const observer = new MutationObserver(function(mutationsList, observer) {
+        for (const mutation of mutationsList) {
+          if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            const formElement = targetNode.querySelector('form'); // Find the actual <form> element
+            if (formElement) {
+              observer.disconnect(); // Stop observing once the form is found
+              console.log("HubSpot form element found:", formElement);
+
+              // Attach our custom submit handler
+              formElement.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent the default form submission
+
+                console.log("Custom form submit handler triggered.");
+
+                const formData = new FormData(formElement);
+                let email = "";
+
+                // Extract email from FormData
+                if (formData.has('email')) { // Assuming 'email' is the name of your email field
+                  email = encodeURIComponent(formData.get('email'));
+                  console.log("Email extracted from form data:", email);
+                } else {
+                  console.warn("Email field not found in form data. Check the 'name' attribute of your email input.");
+                }
+
+                // Manually submit the form data to HubSpot's API
+                // This URL is derived from the 403 error you had before
+                const submissionUrl = `https://forms-eu1.hsforms.com/submissions/v3/public/submit/formsNext/multipart/${formElement.dataset.portalId}/${formElement.dataset.formId}`;
+
+                fetch(submissionUrl, {
+                  method: 'POST',
+                  body: formData,
+                  // HubSpot often requires a specific Content-Type for multipart forms
+                  // However, fetch with FormData usually sets this correctly.
+                  // If issues, you might need to explicitly set 'Content-Type': 'multipart/form-data'
+                  // but this can be tricky with FormData. Let fetch handle it first.
+                } )
+                .then(response => {
+                  console.log("HubSpot submission response:", response);
+                  if (response.ok) {
+                    return response.json(); // Or response.text() depending on HubSpot's success response
+                  }
+                  throw new Error('HubSpot form submission failed.');
+                })
+                .then(data => {
+                  console.log("HubSpot submission successful:", data);
+                  // Now perform your custom redirect
+                  if (email) {
+                    window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+                  } else {
+                    window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html`;
+                  }
+                } )
+                .catch(error => {
+                  console.error("Error submitting form to HubSpot:", error);
+                  // Optionally, redirect to a generic error page or show an error message
+                  alert("There was an error submitting the form. Please try again.");
+                });
+              });
+            }
+          }
+        }
+      });
+
+      // Start observing the target div for child additions
+      observer.observe(targetNode, { childList: true, subtree: true });
+    });
+  </script>
 </body>
 </html>
