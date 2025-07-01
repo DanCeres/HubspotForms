@@ -18,80 +18,79 @@
     document.addEventListener('DOMContentLoaded', function( ) {
       console.log("DOMContentLoaded fired.");
 
-      // Wait for the HubSpot form to be rendered in the DOM
-      // We'll use a MutationObserver to detect when the form is added
-      const targetNode = document.querySelector('.hs-form-html');
-      if (!targetNode) {
-        console.error("Target div for HubSpot form not found.");
-        return;
-      }
+      // Give HubSpot's script a moment to render the form
+      setTimeout(function() {
+        const targetDiv = document.querySelector('.hs-form-html');
+        const formElement = targetDiv ? targetDiv.querySelector('form') : null;
 
-      const observer = new MutationObserver(function(mutationsList, observer) {
-        for (const mutation of mutationsList) {
-          if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-            const formElement = targetNode.querySelector('form'); // Find the actual <form> element
-            if (formElement) {
-              observer.disconnect(); // Stop observing once the form is found
-              console.log("HubSpot form element found:", formElement);
+        if (formElement) {
+          console.log("HubSpot form element found:", formElement);
 
-              // Attach our custom submit handler
-              formElement.addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevent the default form submission
+          // Attach our custom submit handler
+          formElement.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
 
-                console.log("Custom form submit handler triggered.");
+            console.log("Custom form submit handler triggered.");
 
-                const formData = new FormData(formElement);
-                let email = "";
+            const formData = new FormData(formElement);
+            let email = "";
 
-                // Extract email from FormData
-                if (formData.has('email')) { // Assuming 'email' is the name of your email field
-                  email = encodeURIComponent(formData.get('email'));
-                  console.log("Email extracted from form data:", email);
-                } else {
-                  console.warn("Email field not found in form data. Check the 'name' attribute of your email input.");
+            // Extract email from FormData
+            // IMPORTANT: 'email' here must match the 'name' attribute of your email input field in the HubSpot form.
+            // If your HubSpot form uses a different internal name (e.g., 'firstname', 'lastname', 'hs_email'),
+            // you need to use that name here. You can inspect the form HTML to find the correct 'name' attribute.
+            if (formData.has('email')) {
+              email = encodeURIComponent(formData.get('email'));
+              console.log("Email extracted from form data:", email);
+            } else {
+              console.warn("Email field not found in form data using 'email'. Checking all fields...");
+              // Fallback: Iterate through all fields to find one that looks like an email
+              for (let pair of formData.entries()) {
+                if (pair[1].includes('@') && pair[1].includes('.')) {
+                  email = encodeURIComponent(pair[1]);
+                  console.log(`Email found by content scan (field name: ${pair[0]}):`, email);
+                  break;
                 }
-
-                // Manually submit the form data to HubSpot's API
-                // This URL is derived from the 403 error you had before
-                const submissionUrl = `https://forms-eu1.hsforms.com/submissions/v3/public/submit/formsNext/multipart/${formElement.dataset.portalId}/${formElement.dataset.formId}`;
-
-                fetch(submissionUrl, {
-                  method: 'POST',
-                  body: formData,
-                  // HubSpot often requires a specific Content-Type for multipart forms
-                  // However, fetch with FormData usually sets this correctly.
-                  // If issues, you might need to explicitly set 'Content-Type': 'multipart/form-data'
-                  // but this can be tricky with FormData. Let fetch handle it first.
-                } )
-                .then(response => {
-                  console.log("HubSpot submission response:", response);
-                  if (response.ok) {
-                    return response.json(); // Or response.text() depending on HubSpot's success response
-                  }
-                  throw new Error('HubSpot form submission failed.');
-                })
-                .then(data => {
-                  console.log("HubSpot submission successful:", data);
-                  // Now perform your custom redirect
-                  if (email) {
-                    window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
-                  } else {
-                    window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html`;
-                  }
-                } )
-                .catch(error => {
-                  console.error("Error submitting form to HubSpot:", error);
-                  // Optionally, redirect to a generic error page or show an error message
-                  alert("There was an error submitting the form. Please try again.");
-                });
-              });
+              }
             }
-          }
-        }
-      });
 
-      // Start observing the target div for child additions
-      observer.observe(targetNode, { childList: true, subtree: true });
+            // Manually submit the form data to HubSpot's API
+            const portalId = formElement.dataset.portalId;
+            const formId = formElement.dataset.formId;
+            const submissionUrl = `https://forms-eu1.hsforms.com/submissions/v3/public/submit/formsNext/multipart/${portalId}/${formId}`;
+
+            console.log("Submitting to HubSpot URL:", submissionUrl );
+
+            fetch(submissionUrl, {
+              method: 'POST',
+              body: formData,
+            })
+            .then(response => {
+              console.log("HubSpot submission response status:", response.status);
+              if (response.ok) {
+                return response.json();
+              }
+              // If HubSpot returns an error, log it and throw
+              return response.json().then(err => { throw new Error(JSON.stringify(err)); });
+            })
+            .then(data => {
+              console.log("HubSpot submission successful:", data);
+              // Now perform your custom redirect
+              if (email) {
+                window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+              } else {
+                window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html`;
+              }
+            } )
+            .catch(error => {
+              console.error("Error submitting form to HubSpot:", error);
+              alert("There was an error submitting the form. Please try again. Check console for details.");
+            });
+          });
+        } else {
+          console.error("HubSpot form element not found after timeout.");
+        }
+      }, 500); // 500ms delay to allow HubSpot to render the form
     });
   </script>
 </body>
