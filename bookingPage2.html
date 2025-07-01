@@ -20,13 +20,24 @@
       portalId: "146384037",
       formId: "151d4e63-52fe-4518-8b7b-1b137af96405",
       target: "#hubspot-form",
-      onFormSubmit: function($form) {
+      // Use onFormSubmitted instead of onFormSubmit for reliable redirection
+      onFormSubmitted: function(form ) {
+        // Prevent the default form submission behavior
+        // This is crucial to ensure your redirect takes precedence
+        // Note: For hbspt.forms.create, you typically don't need event.preventDefault() here
+        // as the onFormSubmitted fires after HubSpot's internal handling.
+        // However, it's good practice to be aware of it for other form scenarios.
+
         // ✅ Extract email from the form
-        const emailInput = $form.querySelector("input[name='email']");
+        const emailInput = form.querySelector("input[name='email']");
         const email = emailInput ? encodeURIComponent(emailInput.value) : "";
 
         if (email) {
-          window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+          // Add a small delay to ensure HubSpot's internal processes complete
+          // before the redirect. This can help prevent conflicts.
+          setTimeout(function() {
+            window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+          }, 100 ); // 100ms delay
         }
       }
     });
