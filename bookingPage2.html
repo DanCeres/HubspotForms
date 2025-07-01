@@ -1,4 +1,3 @@
-<!-- form.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,16 +6,16 @@
   <title>HubSpot Form</title>
 </head>
 <body>
-  <h1>Subscribe or Contact Us</h1>
+  <h1>Subscribe</h1>
 
-  <!-- HubSpot Embed Code (New Style) -->
+  <!-- ✅ HubSpot Form Embed -->
   <script src="https://js-eu1.hsforms.net/forms/embed/146384037.js" defer></script>
   <div class="hs-form-frame"
        data-region="eu1"
        data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405"
        data-portal-id="146384037"></div>
 
-  <!-- Form submission listener -->
+  <!-- ✅ Handle submission + redirect with email -->
   <script>
     window.addEventListener('message', function (event) {
       const data = event.data;
@@ -27,8 +26,8 @@
         const email = emailField ? encodeURIComponent(emailField.value) : '';
 
         if (email) {
-          // 👇 Replace with your GitHub Pages URL
-          window.location.href = `https://danceres.github.io/HubspotCalendar/confirmationPage2.html?email=${email}`;
+          // 🔁 Replace with your actual GitHub Pages URL if needed
+          window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
         }
       }
     });
