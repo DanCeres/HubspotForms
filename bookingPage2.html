@@ -8,39 +8,38 @@
 <body>
   <h1>Subscribe</h1>
 
-  <!-- Container where form will be inserted -->
-  <div id="hubspot-form"></div>
+  <!-- HubSpot Form Embed Code -->
+  <!-- This script loads the HubSpot Forms library -->
+  <script src="https://js-eu1.hsforms.net/forms/embed/146384037.js" defer></script>
 
-  <!-- Load HubSpot Forms Library -->
-  <script src="https://js.hsforms.net/forms/v2.js"></script>
+  <!-- This div is where the HubSpot form will be rendered -->
+  <div class="hs-form-frame" data-region="eu1" data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405" data-portal-id="146384037"></div>
 
   <script>
-    hbspt.forms.create({
-      region: "eu1",
-      portalId: "146384037",
-      formId: "151d4e63-52fe-4518-8b7b-1b137af96405",
-      target: "#hubspot-form",
-      // Use onFormSubmitted instead of onFormSubmit for reliable redirection
-      onFormSubmitted: function(form ) {
-        // Prevent the default form submission behavior
-        // This is crucial to ensure your redirect takes precedence
-        // Note: For hbspt.forms.create, you typically don't need event.preventDefault() here
-        // as the onFormSubmitted fires after HubSpot's internal handling.
-        // However, it's good practice to be aware of it for other form scenarios.
+    // This function will be called by HubSpot when the form is ready
+    // It's crucial to define this function globally or ensure it's accessible
+    window.hbspt.forms.onFormReady = function(form ) {
+      // Check if this is the form we're interested in
+      if (form.portalId === "146384037" && form.formId === "151d4e63-52fe-4518-8b7b-1b137af96405") {
+        // Attach the onFormSubmitted event listener
+        form.onFormSubmitted(function(event) {
+          // The 'event' object here contains the form submission data
+          // You can access the email from the event.data.email or by querying the form itself
 
-        // ✅ Extract email from the form
-        const emailInput = form.querySelector("input[name='email']");
-        const email = emailInput ? encodeURIComponent(emailInput.value) : "";
+          // ✅ Extract email from the form
+          // It's safer to get the email directly from the form element itself
+          const emailInput = form.querySelector("input[name='email']");
+          const email = emailInput ? encodeURIComponent(emailInput.value) : "";
 
-        if (email) {
-          // Add a small delay to ensure HubSpot's internal processes complete
-          // before the redirect. This can help prevent conflicts.
-          setTimeout(function() {
-            window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
-          }, 100 ); // 100ms delay
-        }
+          if (email) {
+            // Add a small delay to ensure HubSpot's internal processes complete
+            setTimeout(function() {
+              window.location.href = `https://danceres.github.io/HubspotForms/confirmationPage2.html?email=${email}`;
+            }, 100 ); // 100ms delay
+          }
+        });
       }
-    });
+    };
   </script>
 </body>
 </html>
