@@ -1,0 +1,37 @@
+<!-- form.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lead Capture Form</title>
+</head>
+<body>
+  <h1>Sign Up</h1>
+
+  <!-- HubSpot Form Embed -->
+  <script src="https://js-eu1.hsforms.net/forms/embed/146384037.js" defer></script>
+  <div class="hs-form-frame"
+       data-region="eu1"
+       data-form-id="151d4e63-52fe-4518-8b7b-1b137af96405"
+       data-portal-id="146384037"></div>
+
+  <script>
+    // Wait until the form is ready
+    window.addEventListener('message', function (event) {
+      const data = event.data;
+
+      // Check if it's a HubSpot form submission event
+      if (data.type === 'hsFormCallback' && data.eventName === 'onFormSubmit') {
+        const fields = data.data || [];
+        const emailField = fields.find(field => field.name === 'email');
+        const email = emailField ? encodeURIComponent(emailField.value) : '';
+
+        // Redirect to thank you page with email in URL
+        if (email) {
+          window.location.href = `confirmationPage2.html?email=${email}`;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
